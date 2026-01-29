@@ -7,14 +7,16 @@ A Julia reference implementation of the [concore](https://github.com/ControlCore
 
 ## Overview
 
-This prototype demonstrates core concore functionality in idiomatic Julia:
+I'm building a Julia port of concore from scratch. Right now, the prototype covers the core functionality:
 
-- **GraphML Workflow Parsing** — Load node definitions from GraphML files
-- **PID Node Execution** — Type-stable control computations with state management
-- **File-Based Communication** — Mirrors the concore IPC pattern (`read`/`write` via files)
-- **FileWatching Integration** — Stub for reactive execution triggers
+- **GraphML Workflow Parsing** — Loads node definitions and parameters from GraphML files
+- **PID Node Execution** — Type-stable PID controller logic with state management
+- **File-Based Communication** — Mirrors how concore passes data between nodes via files
+- **FileWatching Integration** — Watches for file changes instead of polling (more efficient than Python)
 
 ## Installation
+
+You'll need Julia 1.6 or later. Then:
 
 ```julia
 using Pkg
@@ -22,11 +24,13 @@ Pkg.activate(".")
 Pkg.instantiate()
 ```
 
-Requires Julia 1.6+ and will install:
-- `EzXML.jl` — XML/GraphML parsing
-- `FileWatching` — File change detection (stdlib)
+That's it! The dependencies are minimal:
+- `EzXML.jl` for parsing GraphML files
+- `FileWatching` (comes with Julia stdlib)
 
 ## Quick Start
+
+Got Julia installed? Here's how to try it out:
 
 ```julia
 using Concore
@@ -34,11 +38,11 @@ using Concore
 # Load a workflow from GraphML
 nodes = load_graph("examples/sample_graph.graphml")
 
-# Get the controller node
+# Grab the first node
 controller = nodes[1]
 println("Loaded: $(controller.id) with kp=$(controller.kp)")
 
-# Run a PID step
+# Run one PID step
 error = 10.0
 output = execute_step(controller, error)
 println("Error=$error → Output=$output")
@@ -88,6 +92,22 @@ end
 </graphml>
 ```
 
+## Progress & Effort
+
+**Application Period**: ~20 hours spent (as of Jan 29, 2026)
+- GraphML parsing implementation
+- PID controller logic
+- File-based communication stubs
+- FileWatching integration
+- This prototype
+
+**GSoC Timeline** (350 hours total):
+- Phase 1 (Weeks 1-4): Core protocol implementation ✓ (in progress)
+- Phase 2 (Weeks 5-8): Edge execution & multi-node orchestration
+- Phase 3 (Weeks 9-12): Testing, optimization, and full concore-lite compatibility
+
+See the roadmap below for what's coming next.
+
 ## Examples
 
 ### Basic Example
@@ -104,31 +124,27 @@ julia --project=. examples/concore_loop_example.jl
 
 Shows the full concore-style loop pattern (mirrors Python/C++ implementations).
 
-## Architecture & Design Decisions
+## Design & Architecture
 
-This implementation follows patterns from the existing concore codebase while leveraging Julia's strengths:
+I'm following the existing concore patterns but using Julia idioms where it makes sense. Here's how I'm mapping across languages:
 
-| Concore Pattern | Julia Implementation |
-|-----------------|---------------------|
+| Pattern | Julia Choice |
+|---------|---------------|
 | Python module globals | `STATE` Dict with symbols |
 | C++ `Concore` class | `ConcoreNode` mutable struct |
-| `unchanged()` sync loop | Same pattern, uses string accumulator |
-| File format `[simtime, ...]` | Preserved for compatibility |
+| `unchanged()` sync loop | Same logic, string accumulator |
+| File format `[simtime, ...]` | Kept for compatibility |
 | Verilog `readdata`/`writedata` | `read_input`/`write_output` |
 
-### Julia-Specific Optimizations
+### Why These Choices?
 
-- **Mutable structs** — Julia-native, allows in-place state updates without allocation
-- **Multiple dispatch** — `execute_step` can be extended for different node types (future: filters, estimators)
-- **Type-stable fields** — All `Float64` for predictable JIT compilation and performance
-- **No inheritance** — Avoids Python-style OOP; uses composition + dispatch instead
-- **FileWatching stdlib** — Native file monitoring without polling overhead (unlike Python concore)
+Julia lets me do some things better than the original Python:
+- **Mutable structs** are perfect for state (no need for classes)
+- **Multiple dispatch** means I can extend `execute_step` later for different node types
+- **Type-stable fields** help the JIT compiler generate fast code
+- **FileWatching stdlib** gives native file monitoring without slow polling
 
-### Protocol Compatibility
-
-- All file formats match existing concore implementations
-- Array serialization format: `[simtime, value1, value2, ...]`
-- Ready to interop with Python/C++/Verilog nodes in mixed environments
+I'm avoiding OOP inheritance and just using composition + dispatch, which is more idiomatic Julia.
 
 ## Project Structure
 
