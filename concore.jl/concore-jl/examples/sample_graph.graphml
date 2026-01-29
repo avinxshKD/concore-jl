@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <graph id="G" edgedefault="directed">
+    <!-- PID Controller Node -->
+    <node id="controller">
+      <data key="kp">2.0</data>
+      <data key="ki">0.5</data>
+      <data key="kd">0.1</data>
+    </node>
+    
+    <!-- Plant Model Node (simpler gains) -->
+    <node id="plant">
+      <data key="kp">1.0</data>
+      <data key="ki">0.0</data>
+      <data key="kd">0.0</data>
+    </node>
+    
+    <!-- Edge: controller output -> plant input -->
+    <edge id="e1" source="controller" target="plant"/>
+  </graph>
+</graphml>

@@ -1,0 +1,11 @@
+name = "Concore"
+uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+version = "0.1.0"
+
+[deps]
+EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+FileWatching = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+
+[compat]
+julia = "1.6"
+EzXML = "1.1"
