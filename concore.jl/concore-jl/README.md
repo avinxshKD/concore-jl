@@ -104,9 +104,9 @@ julia --project=. examples/concore_loop_example.jl
 
 Shows the full concore-style loop pattern (mirrors Python/C++ implementations).
 
-## Architecture Notes
+## Architecture & Design Decisions
 
-This implementation follows patterns from the existing concore codebase:
+This implementation follows patterns from the existing concore codebase while leveraging Julia's strengths:
 
 | Concore Pattern | Julia Implementation |
 |-----------------|---------------------|
@@ -116,12 +116,19 @@ This implementation follows patterns from the existing concore codebase:
 | File format `[simtime, ...]` | Preserved for compatibility |
 | Verilog `readdata`/`writedata` | `read_input`/`write_output` |
 
-### Why These Choices?
+### Julia-Specific Optimizations
 
-- **Mutable structs** — Julia-native, allows state updates without allocation
-- **Multiple dispatch** — `execute_step` can be extended for different node types
-- **Type-stable fields** — All `Float64` for predictable performance
-- **No classes** — Avoids Python-style OOP in favor of Julia idioms
+- **Mutable structs** — Julia-native, allows in-place state updates without allocation
+- **Multiple dispatch** — `execute_step` can be extended for different node types (future: filters, estimators)
+- **Type-stable fields** — All `Float64` for predictable JIT compilation and performance
+- **No inheritance** — Avoids Python-style OOP; uses composition + dispatch instead
+- **FileWatching stdlib** — Native file monitoring without polling overhead (unlike Python concore)
+
+### Protocol Compatibility
+
+- All file formats match existing concore implementations
+- Array serialization format: `[simtime, value1, value2, ...]`
+- Ready to interop with Python/C++/Verilog nodes in mixed environments
 
 ## Project Structure
 
